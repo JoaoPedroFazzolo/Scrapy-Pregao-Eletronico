@@ -1,0 +1,7 @@
+Seu funcionamento ocorre apenas para pregões na lei 14.133/21 e sem a presença de grupos nos itens do certame.
+Ao iniciar o progama, provavelmente o sistema solicitará verificação de segurança, deve-se clicar em "executar mesmo assim" ou algo semelhante.
+Para o correto funcionamento do programa, se faz necessário o uso do driver correspondente a versão do navegador.
+Também é necessário que seja executado logo após a fase de lances, antes de qualquer convocação ou negociação junto as empresas.
+O driver disponivel junto a este arquivo utiliza a versão 119.0 (64 bits) do firefox para windows.
+Para demais versões acesse https://github.com/mozilla/geckodriver/releases.
+Para sugestões de alterações ou melhor desenvolvimento do programa, o código está disponivel em: https://github.com/JoaoPedroFazzolo/Scrapy-Pregao-Eletronico.git
