@@ -65,8 +65,8 @@ pregao = "Pregão Eletrônico " + uasg + " - " + numero
 navegador = webdriver.Firefox()
 time.sleep(10)
 navegador.get('https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-area-trabalho-web/seguro/governo/area-trabalho')
-time.sleep(10)
 urlAtual = navegador.current_url
+time.sleep(10)
 ##########################         criando espera para o login do usuario de 5min       ############################
 try:
     waitLogin = WebDriverWait(navegador, 900).until(
@@ -147,17 +147,20 @@ def informaçoesItens():
 
 #########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
 def informaçoesEmpresas():
-    for j in range (1, qntEmpresas):
-        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div['+ str(j) + ']/div[1]').text
-        nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div[' + str(j) + ']/div[2]/div').text
-        if len(cnpjEmpresaCompleto.split('\n')) == 1:
-            cnpjEmpresa = cnpjEmpresaCompleto
-            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
-        else:
-            cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
-            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
+    try:
+        for j in range (1, qntEmpresas+1):
+            cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div['+ str(j) + ']/div[1]').text
+            nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div[' + str(j) + ']/div[2]/div').text
+            if len(cnpjEmpresaCompleto.split('\n')) == 1:
+                cnpjEmpresa = cnpjEmpresaCompleto
+                informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
+            else:
+                cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
+                informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
          
-        todasInformacoesEmpresas[j] = informacoesEmpresa
+            todasInformacoesEmpresas[j] = informacoesEmpresa
+    except:
+        pass
             
 
 ##########################        iterando sobre todos os itens        ############################
@@ -282,7 +285,7 @@ wbAnalise = wb['Análise da empresa']
 #cabeçalho
 wbAnalise.append(['Descrição Resumida',	'Empresa', 'Qnt Solicitada', 'Valor Estimado', 'Valor ofertado pela empresa', 'Negociou Valor?', 'Especificação Técnica', 'Validade da Proposta', 'SICAF', 'Sanção / Ocorrência', 'CEIS', 'CNJ', 'TCU', 'Empresário Individual:Inscrição no Registro Público', 'MEI:Certificado da Condição de Microempreendedor Individual Verificar autenticidade', 'Sociedade Empresária ou Empresa Individual de Responsabilidade Limitada: Ato Constitutivo, Estatuto ou Contrato Social', 'Ato Constitutivo', 'Inscrição CNPJ', 'Regularidade Fiscal Fazenda Nacional', 'FGTS', 'CNDT', 'Inscrição Contribuintes Estadual -Excluído para ME/EPP', 'Regularidade Fazenda Estadual - Excluído para ME/EPP', 'Certidão Negativa de Falência', 'Balanço Patrimonial - Excluído para ME/EPP', 'Boa Situação Financeira', 'Habilitação Técnica'])
 linha2 = 2  
-for l in range(len(informacoesCompletas)-1):
+for l in range(len(informacoesCompletas)):
     DescriçãoResumida2 = informacoesCompletas[l]['DescricaoResumida'][0]
     try:        
         Empresa2 = informacoesCompletas[l]['DescricaoEmpresas'][0][0]
