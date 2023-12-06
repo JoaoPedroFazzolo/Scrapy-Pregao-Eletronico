@@ -116,6 +116,7 @@ urlAtual = navegador.current_url
 navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-0"]/app-selecao-fornecedores-governo-itens/div[1]/div[2]/p-dataview/div/div[2]/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
 wait60(navegador,urlAtual)
 
+grupos = []
 listaDescricaoResumidaItem = []
 listaValorEstimado = []
 listaDescricaoEmpresasCompleta = []
@@ -123,7 +124,7 @@ listaValoresOfertadosCompleta = []
 informacoesCompletas = []
 todasInformacoesEmpresas = {}
 
-
+     
 ##########################        função para abrir os itens e retirar as informações necessárias        ############################
 def informaçoesItens():
     #descrição do item:
@@ -162,9 +163,20 @@ def informaçoesEmpresas():
     except:
         pass
             
+#########################        função para abrir a aba empresas e retirar as informações de cada item do grupo      ############################
+def grupo():
+    for g in range(1,4):
+        empresaGrupo = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div['+ str(g) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span')).text
+        
+
 
 ##########################        iterando sobre todos os itens        ############################
 
+##########################        função para verificar se é grupo ou não cada item        ############################
+if "GRUPO" in navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[1]/div/app-identificacao-e-fase-item/div[1]').text.split('\n'):
+    urlAtual = navegador.current_url 
+    navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-0"]/app-selecao-fornecedores-governo-itens/div[1]/div[2]/p-dataview/div/div[2]/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
+    wait60(navegador,urlAtual)
 
 while True:
     informacoes = informaçoesItens()
