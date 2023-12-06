@@ -164,10 +164,39 @@ def informaçoesEmpresas():
         pass
             
 #########################        função para abrir a aba empresas e retirar as informações de cada item do grupo      ############################
-def grupo():
+def funcaoGrupo():
+    TodasEmpresasGrupo = []
     for g in range(1,4):
-        empresaGrupo = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div['+ str(g) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span')).text
-        
+        nomeEmpresaGrupo = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div['+ str(g) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span')).text
+        urlAtual = navegador.current_url         
+        navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div['+ str(g)+']/app-dados-proposta-item-em-selecao-fornecedores/div/div[3]/div[2]/div/app-botao-icone/span/button').clicl()
+        wait60(navegador,urlAtual)
+        h = 1
+        itemGrupo = []
+        valorOfertadoGrupo = []
+        valorEstimadoGrupo = []
+        qntSolicitadaGrupo = []
+        qntOfertadaGrupo = []
+        while True:
+            try:
+                itemGrupo1 = (navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h)+ ']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[1]/div/div/app-identificacao-e-fase-item/div[1]')).text
+                valorOfertadoGrupo1 = (navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h)+']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[3]/div/div/div/div[2]/div[1]')).text
+                valorEstimadoGrupo1 = (navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h)+ ']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[2]')).text
+                qntSolicitadaGrupo1 = (navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h)+ ']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]')).text
+                navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h) +']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[4]/div/app-botao-expandir-item/button').click
+                qntOfertadaGrupo1 = (navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h) +']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[5]/div[2]/app-detalhes-proposta-item/div[2]/div[1]/div[2]')).text
+                navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-9"]/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/div[2]/div/div['+ str(h) +']/app-card-proposta-subitem-em-selecao-fornecedores/div/div[4]/div/app-botao-expandir-item/button').click
+                h += 1
+                itemGrupo.append(itemGrupo1)
+                valorOfertadoGrupo.append(valorOfertadoGrupo1)
+                valorEstimadoGrupo.append(valorEstimadoGrupo1)
+                qntSolicitadaGrupo.append(qntSolicitadaGrupo1)
+                qntOfertadaGrupo.append(qntOfertadaGrupo1)
+            except:
+                break
+            nomeEmpresaGrupo1 = {'Empresa': nomeEmpresaGrupo, 'Item do grupo': itemGrupo, 'Valor Estimado': valorEstimadoGrupo, 'Valor Ofertado': valorOfertadoGrupo, 'Qnt Solicitada': qntSolicitadaGrupo, 'Qnt Ofertada': qntOfertadaGrupo}
+        TodasEmpresasGrupo.append(nomeEmpresaGrupo1)
+        return TodasEmpresasGrupo
 
 
 ##########################        iterando sobre todos os itens        ############################
@@ -177,6 +206,7 @@ if "GRUPO" in navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/
     urlAtual = navegador.current_url 
     navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-0"]/app-selecao-fornecedores-governo-itens/div[1]/div[2]/p-dataview/div/div[2]/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
     wait60(navegador,urlAtual)
+    grupos = funcaoGrupo()
 
 while True:
     informacoes = informaçoesItens()
