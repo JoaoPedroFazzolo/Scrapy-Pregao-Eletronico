@@ -2,7 +2,7 @@ import time
 import openpyxl
 import PySimpleGUI as sg
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -62,7 +62,7 @@ while True:
 pregao = "Pregão Eletrônico " + uasg + " - " + numero
 
 
-navegador = webdriver.Firefox()
+navegador = webdriver.Chrome()
 time.sleep(10)
 navegador.get('https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-area-trabalho-web/seguro/governo/area-trabalho')
 urlAtual = navegador.current_url
@@ -94,16 +94,20 @@ navegador.find_element(By.XPATH, '//*[@id="buscaCompra"]').send_keys(numero)
 navegador.find_element(By.XPATH, '/html/body/app-root/div/app-area-governo/div/div[2]/div[2]/div/div[2]/button').click()
 wait60(navegador,urlAtual)
 for i in range(10):
-    urlXPATH = str('/html/body/app-root/div/app-pesquisa-rapida/div/div[5]/p-dataview/div/div[2]/div/div['+ str(i) +']/div/div[2]/span')
+    urlXPATH = str('/html/body/app-root/div/app-pesquisa-rapida/div/div[5]/p-dataview/div/div['+ str(i) +']/div/div/div[2]/span')
     pregoesPesquisa = navegador.find_elements(By.XPATH, urlXPATH )
     for e in pregoesPesquisa:
         if e.text == str(pregao):
             bottonXpath = urlXPATH[:-7] + '5]/i'
             navegador.find_element(By.XPATH, bottonXpath).click()
             time.sleep(3)
-            navegador.find_element(By.XPATH, '/html/body/app-root/div/app-pesquisa-rapida/div/p-dialog/div/div[1]/app-item-trabalho-detalhe/div[2]/div[2]/div/div[2]/app-redirect-sistemas/span/span').click()
+            navegador.find_element(By.XPATH, '/html/body/app-root/div/app-pesquisa-rapida/div/p-dialog/div/div/div[2]/app-item-trabalho-detalhe/div[2]/div[2]/div/div[2]/app-redirect-sistemas/span/span').click()
+            break
+        else:
+            continue
+        break
 
-time.sleep(5)
+time.sleep(5)                                 
 ##########################         alterando janela        ############################
 handles = navegador.window_handles
 navegador.switch_to.window(handles[1])
@@ -113,15 +117,8 @@ navegador.switch_to.window(handles[1])
 #abrindo item 1
 time.sleep(5)
 urlAtual = navegador.current_url
-navegador.find_element(By.XPATH, '//*[@id="ui-tabpanel-0"]/app-selecao-fornecedores-governo-itens/div[1]/div[2]/p-dataview/div/div[2]/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
+navegador.find_element(By.XPATH, '//*[@id="pn_id_2_content"]/app-selecao-fornecedores-governo-itens/div[2]/p-dataview/div/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
 wait60(navegador,urlAtual)
-
-listaDescricaoResumidaItem = []
-listaValorEstimado = []
-listaDescricaoEmpresasCompleta = []
-listaValoresOfertadosCompleta = []
-informacoesCompletas = []
-todasInformacoesEmpresas = {}
 
 
 ##########################        função para abrir os itens e retirar as informações necessárias        ############################
@@ -133,49 +130,41 @@ def informaçoesItens():
     #3 primeiras empresas:
     descriçoesEmpresasCompleta = []
     valoresOfertadosCompleta = []
-    try:
-        for f in range(1, 4):
-            descriçãoEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
-            valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div[2]/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div').text.split('\n'))[2]
-            
-            descriçoesEmpresasCompleta.append(descriçãoEmpresa)
-            valoresOfertadosCompleta.append(valorOfertado)
-    except:
-        ""
+    for f in range(1, 4):
+        nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
+        valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
+        descriçoesEmpresasCompleta.append(nomeEmpresa)
+        valoresOfertadosCompleta.append(valorOfertado)
     #retirar os valores da lista completa e coloca-los na descrição da empresa completa
     return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
 
 #########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
 def informaçoesEmpresas():
-    try:
-        for j in range (1, qntEmpresas+1):
-            cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div['+ str(j) + ']/div[1]').text
-            nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div[2]/div/div[' + str(j) + ']/div[2]/div').text
-            if len(cnpjEmpresaCompleto.split('\n')) == 1:
-                cnpjEmpresa = cnpjEmpresaCompleto
-                informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
-            else:
-                cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
-                informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
-         
-            todasInformacoesEmpresas[j] = informacoesEmpresa
-    except:
-        pass
+    informaçoesEmpresas = []
+    for j in range (1, qntEmpresas+1):
+        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '//*[@id="pn_id_357_content"]/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]').text
+        nomeEmpresa = navegador.find_element(By.XPATH, '//*[@id="pn_id_357_content"]/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div[' + str(j) + ']/div[2]/div/span').text        
+        if len(cnpjEmpresaCompleto.split('\n')) == 1:
+            cnpjEmpresa = cnpjEmpresaCompleto
+            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
+        else:
+            cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
+            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
+        informaçoesEmpresas.append(informacoesEmpresa)  
+    return informaçoesEmpresas
+
             
 
 ##########################        iterando sobre todos os itens        ############################
-
+informacoesCompletas = []
 
 while True:
     informacoes = informaçoesItens()
-    listaDescricaoResumidaItem.append(informacoes[0])
-    listaValorEstimado.append(informacoes[1])
-    listaDescricaoEmpresasCompleta.extend(informacoes[2])
-    listaValoresOfertadosCompleta.extend(informacoes[3])
     iteracao = {
         "DescricaoResumida": informacoes[0],
-        "ValorEstimado": informacoes[1],
-        "DescricaoEmpresas": informacoes[2],
+        "Quantidade": informacoes[1][2],
+        "ValorEstimado": informacoes[1][3],
+        "NomeEmpresas": informacoes[2],
         "ValoresOfertados": informacoes[3]
     }
     informacoesCompletas.append(iteracao)
@@ -184,15 +173,14 @@ while True:
     if xpathProximaPagina.get_attribute("disabled"):
         navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/footer/app-acoes-governo-no-item/div/button').click()
         wait60(navegador,urlAtual)
-        navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/ul/li[2]').click()
+        navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[1]/div/ul/li[2]/a').click()
         break
     xpathProximaPagina.click()
     wait60(navegador,urlAtual)
 
 ##########################        retirando as informações das empresas        ############################
 time.sleep(5)
-informaçoesEmpresas()
-
+todasEmpresas = informaçoesEmpresas()
 
 ##########################        FIM DO SCRAPY        ############################
 ##########################        CRIANDO A TABELA DE APOIO        ############################
@@ -227,10 +215,10 @@ wbEmpresas = wb['Empresas']
 wbEmpresas.append(['CNPJ', 'ME/EPP', 'NOME EMPRESA'])
 #colocando itens na planilha
 linha = 2  
-for chave, informacoes in todasInformacoesEmpresas.items():
-    cnpj = informacoes.get('CNPJ', '')
-    meEpp = informacoes.get('ME/EPP', '')
-    nome = informacoes.get('Nome', '')
+for a in todasEmpresas:
+    cnpj = a['CNPJ']
+    meEpp = a['ME/EPP']
+    nome = a['Nome']
     wbEmpresas.cell(row=linha, column=1, value=cnpj)
     wbEmpresas.cell(row=linha, column=2, value=meEpp)
     wbEmpresas.cell(row=linha, column=3, value=nome)
@@ -248,23 +236,18 @@ wbItens = wb['Três primeiras empresas']
 wbItens.append(['Item/Descrição Resumida', 'Valor Estimado','Qnt Solicitada', 'Empresa', 'Valor ofertado pela empresa'])
 linha1 = 2 
 for k in range(len(informacoesCompletas)):
-    DescriçãoResumida1 = informacoesCompletas[k]['DescricaoResumida'][0]
-    ValorEstimado1 = round(float(informacoesCompletas[k]['ValorEstimado'][3].replace("R$", "").replace(".", "").replace(",", ".")), 4)
-    QntSolicitada1 = int(informacoesCompletas[k]['ValorEstimado'][2])
-    
+    DescriçãoResumida1 = str(informacoesCompletas[k]['DescricaoResumida'][0])
+    ValorEstimado1 = round(float(informacoesCompletas[k]['ValorEstimado'].replace("R$", "").replace(".", "").replace(",", ".")), 4)
+    QntSolicitada1 = int(informacoesCompletas[k]['Quantidade'])
     wbItens.cell(row=linha1, column=1, value=DescriçãoResumida1)
     wbItens.cell(row=linha1, column=2, value=ValorEstimado1)
     wbItens.cell(row=linha1, column=3, value=QntSolicitada1)   
-    try:
-        for n in range(3):
-            Empresa1 = informacoesCompletas[k]['DescricaoEmpresas'][n][0]
-            ValorOfertado1 = round(float((informacoesCompletas[k]['ValoresOfertados'][n]).replace("R$", "").replace(".", "").replace(",", ".")), 4)
-        
-            wbItens.cell(row=linha1, column=4, value=Empresa1)
-            wbItens.cell(row=linha1, column=5, value=ValorOfertado1)
-            linha1 += 1
-    except:
-        ""
+    for n in range(3):
+        Empresa1 = str(informacoesCompletas[k]['NomeEmpresas'][n][0])
+        ValorOfertado1 = round(float(informacoesCompletas[k]['ValoresOfertados'][n][0].replace("R$", "").replace(".", "").replace(",", ".")), 4)
+        wbItens.cell(row=linha1, column=4, value=Empresa1)
+        wbItens.cell(row=linha1, column=5, value=ValorOfertado1)
+        linha1 += 1
 
 cellStyle = NamedStyle(name="cellStyle")
 cellStyle.number_format = '"R$ "#,##0.00_);[Red]"R$ "#,##0.00'
@@ -286,18 +269,17 @@ wbAnalise = wb['Análise da empresa']
 wbAnalise.append(['Descrição Resumida',	'Empresa', 'Qnt Solicitada', 'Valor Estimado', 'Valor ofertado pela empresa', 'Negociou Valor?', 'Especificação Técnica', 'Validade da Proposta', 'SICAF', 'Sanção / Ocorrência', 'CEIS', 'CNJ', 'TCU', 'Empresário Individual:Inscrição no Registro Público', 'MEI:Certificado da Condição de Microempreendedor Individual Verificar autenticidade', 'Sociedade Empresária ou Empresa Individual de Responsabilidade Limitada: Ato Constitutivo, Estatuto ou Contrato Social', 'Ato Constitutivo', 'Inscrição CNPJ', 'Regularidade Fiscal Fazenda Nacional', 'FGTS', 'CNDT', 'Inscrição Contribuintes Estadual -Excluído para ME/EPP', 'Regularidade Fazenda Estadual - Excluído para ME/EPP', 'Certidão Negativa de Falência', 'Balanço Patrimonial - Excluído para ME/EPP', 'Boa Situação Financeira', 'Habilitação Técnica'])
 linha2 = 2  
 for l in range(len(informacoesCompletas)):
-    DescriçãoResumida2 = informacoesCompletas[l]['DescricaoResumida'][0]
-    try:        
-        Empresa2 = informacoesCompletas[l]['DescricaoEmpresas'][0][0]
+    DescriçãoResumida2 = str(informacoesCompletas[l]['DescricaoResumida'][0])
+    try:      
+        Empresa2 = str(informacoesCompletas[l]['NomeEmpresas'][0][0])
     except:
         Empresa2 = "Deserto"
-    QntSolicitada2 = (informacoesCompletas[l]['ValorEstimado'][2])
-    ValorEstimado2 = round(float((informacoesCompletas[l]['ValorEstimado'][3]).replace("R$", "").replace(".", "").replace(",", ".")), 4)
+    QntSolicitada2 = int(informacoesCompletas[l]['Quantidade'])
+    ValorEstimado2 = round(float((informacoesCompletas[l]['ValorEstimado']).replace("R$", "").replace(".", "").replace(",", ".")), 4)
     try:
-        ValorOfertado2 = round(float((informacoesCompletas[l]['ValoresOfertados'][0]).replace("R$", "").replace(".", "").replace(",", ".")), 4)
+        ValorOfertado2 = round(float((informacoesCompletas[l]['ValoresOfertados'][0][0]).replace("R$", "").replace(".", "").replace(",", ".")), 4)
     except:
         ValorOfertado2 = 0
-
 
     wbAnalise.cell(row=linha2, column=1, value=DescriçãoResumida2)
     wbAnalise.cell(row=linha2, column=2, value=Empresa2)
