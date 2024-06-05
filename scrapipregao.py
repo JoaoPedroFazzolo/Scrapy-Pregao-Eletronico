@@ -135,12 +135,16 @@ def informaçoesItens():
     descriçoesEmpresasCompleta = []
     valoresOfertadosCompleta = []
     for f in range(1, 4):
-        nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
-        valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
-        descriçoesEmpresasCompleta.append(nomeEmpresa)
-        valoresOfertadosCompleta.append(valorOfertado)
+        try:
+            nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
+            valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
+            descriçoesEmpresasCompleta.append(nomeEmpresa)
+            valoresOfertadosCompleta.append(valorOfertado)
     #retirar os valores da lista completa e coloca-los na descrição da empresa completa
-    return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
+            return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
+        except:
+            continue
+        
 
 #########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
 def informaçoesEmpresas():
