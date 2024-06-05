@@ -171,7 +171,7 @@ while True:
     }
     informacoesCompletas.append(iteracao)
     urlAtual = navegador.current_url
-    xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[3]/span/button')
+    xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[4]/span/button')
     if xpathProximaPagina.get_attribute("disabled"):
         navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/footer/app-acoes-governo-no-item/div/button').click()
         wait60(navegador,urlAtual)
