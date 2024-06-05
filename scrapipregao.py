@@ -30,7 +30,6 @@ layout = [
 ]
 
 window = sg.Window('Dados do Pregão', layout)
-
 while True:
     event, values = window.read()
 
@@ -59,6 +58,7 @@ while True:
                 confirmationWindow.close()
                 window.close()
                 break
+
 pregao = "Pregão Eletrônico " + uasg + " - " + numero
 
 
@@ -97,15 +97,19 @@ for i in range(10):
     urlXPATH = str('/html/body/app-root/div/app-pesquisa-rapida/div/div[5]/p-dataview/div/div['+ str(i) +']/div/div/div[2]/span')
     pregoesPesquisa = navegador.find_elements(By.XPATH, urlXPATH )
     for e in pregoesPesquisa:
+        a = 1
         if e.text == str(pregao):
-            bottonXpath = urlXPATH[:-7] + '5]/i'
+            bottonXpath = str('/html/body/app-root/div/app-pesquisa-rapida/div/div[5]/p-dataview/div/div[2]/div['+ str(a) +']/div/div[5]/i')
             navegador.find_element(By.XPATH, bottonXpath).click()
             time.sleep(3)
             navegador.find_element(By.XPATH, '/html/body/app-root/div/app-pesquisa-rapida/div/p-dialog/div/div/div[2]/app-item-trabalho-detalhe/div[2]/div[2]/div/div[2]/app-redirect-sistemas/span/span').click()
             break
         else:
+            a =+ 1 
             continue
         break
+
+
 
 time.sleep(5)                                 
 ##########################         alterando janela        ############################
@@ -142,8 +146,8 @@ def informaçoesItens():
 def informaçoesEmpresas():
     informaçoesEmpresas = []
     for j in range (1, qntEmpresas+1):
-        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '//*[@id="pn_id_357_content"]/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]').text
-        nomeEmpresa = navegador.find_element(By.XPATH, '//*[@id="pn_id_357_content"]/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div[' + str(j) + ']/div[2]/div/span').text        
+        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]/div/div[1]').text
+        nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div[' + str(j) + ']/div[2]/div/span').text        
         if len(cnpjEmpresaCompleto.split('\n')) == 1:
             cnpjEmpresa = cnpjEmpresaCompleto
             informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
@@ -152,8 +156,6 @@ def informaçoesEmpresas():
             informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
         informaçoesEmpresas.append(informacoesEmpresa)  
     return informaçoesEmpresas
-
-            
 
 ##########################        iterando sobre todos os itens        ############################
 informacoesCompletas = []
@@ -169,7 +171,7 @@ while True:
     }
     informacoesCompletas.append(iteracao)
     urlAtual = navegador.current_url
-    xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[4]/span/button')
+    xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[3]/span/button')
     if xpathProximaPagina.get_attribute("disabled"):
         navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/footer/app-acoes-governo-no-item/div/button').click()
         wait60(navegador,urlAtual)
