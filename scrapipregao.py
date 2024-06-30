@@ -134,17 +134,16 @@ def informaçoesItens():
     #3 primeiras empresas:
     descriçoesEmpresasCompleta = []
     valoresOfertadosCompleta = []
-    for f in range(1, 4):
-        try:
+    try:
+        for f in range(1, 4):
             nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
             valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
             descriçoesEmpresasCompleta.append(nomeEmpresa)
             valoresOfertadosCompleta.append(valorOfertado)
+    except:
+        pass
     #retirar os valores da lista completa e coloca-los na descrição da empresa completa
-            return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
-        except:
-            continue
-        
+    return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
 
 #########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
 def informaçoesEmpresas():
@@ -181,8 +180,9 @@ while True:
         wait60(navegador,urlAtual)
         navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[1]/div/ul/li[2]/a').click()
         break
-    xpathProximaPagina.click()
-    wait60(navegador,urlAtual)
+    else:
+        xpathProximaPagina.click()
+        wait60(navegador,urlAtual)
 
 ##########################        retirando as informações das empresas        ############################
 time.sleep(5)
@@ -248,12 +248,15 @@ for k in range(len(informacoesCompletas)):
     wbItens.cell(row=linha1, column=1, value=DescriçãoResumida1)
     wbItens.cell(row=linha1, column=2, value=ValorEstimado1)
     wbItens.cell(row=linha1, column=3, value=QntSolicitada1)   
-    for n in range(3):
-        Empresa1 = str(informacoesCompletas[k]['NomeEmpresas'][n][0])
-        ValorOfertado1 = round(float(informacoesCompletas[k]['ValoresOfertados'][n][0].replace("R$", "").replace(".", "").replace(",", ".")), 4)
-        wbItens.cell(row=linha1, column=4, value=Empresa1)
-        wbItens.cell(row=linha1, column=5, value=ValorOfertado1)
-        linha1 += 1
+    try:
+        for n in range(3):
+            Empresa1 = str(informacoesCompletas[k]['NomeEmpresas'][n][0])
+            ValorOfertado1 = round(float(informacoesCompletas[k]['ValoresOfertados'][n][0].replace("R$", "").replace(".", "").replace(",", ".")), 4)
+            wbItens.cell(row=linha1, column=4, value=Empresa1)
+            wbItens.cell(row=linha1, column=5, value=ValorOfertado1)
+            linha1 += 1
+    except:
+        pass
 
 cellStyle = NamedStyle(name="cellStyle")
 cellStyle.number_format = '"R$ "#,##0.00_);[Red]"R$ "#,##0.00'
