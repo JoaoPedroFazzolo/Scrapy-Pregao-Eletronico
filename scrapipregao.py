@@ -1,4 +1,5 @@
 import time
+import random
 import openpyxl
 import PySimpleGUI as sg
 from selenium import webdriver
@@ -86,6 +87,16 @@ def wait60(navegador,urlAtual):
     except:
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
+
+def randomWait(navegador,urlAtual):
+    try:
+        aleatorio = random.randint(5, 40)
+        randomwait = WebDriverWait(navegador, 20) 
+        randomwait.until(EC.url_changes(urlAtual))
+        print(aleatorio)
+        time.sleep(aleatorio)
+    except:
+        navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
 ##########################         abrindo o pregao 14.133        ############################
 wait60(navegador,urlAtual)
@@ -182,7 +193,7 @@ while True:
         break
     else:
         xpathProximaPagina.click()
-        wait60(navegador,urlAtual)
+        randomWait(navegador,urlAtual)
 
 ##########################        retirando as informações das empresas        ############################
 time.sleep(5)
