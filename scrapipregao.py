@@ -90,11 +90,11 @@ def wait60(navegador,urlAtual):
 
 def randomWait(navegador,urlAtual):
     try:
-        aleatorio = random.randint(5, 40)
-        randomwait = WebDriverWait(navegador, 20) 
+        aleatorio = random.randint(5, 55)
+        time.sleep(aleatorio)
+        randomwait = WebDriverWait(navegador, 5) 
         randomwait.until(EC.url_changes(urlAtual))
         print(aleatorio)
-        time.sleep(aleatorio)
     except:
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
