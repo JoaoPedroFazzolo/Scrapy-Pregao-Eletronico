@@ -1,6 +1,8 @@
+import os
 import time
 import random
 import openpyxl
+import pandas as pd
 import PySimpleGUI as sg
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -10,6 +12,86 @@ from selenium.webdriver.support import expected_conditions as EC
 from openpyxl import Workbook, load_workbook, writer
 from openpyxl.styles import Alignment, NamedStyle, PatternFill
 from openpyxl.worksheet.filters import FilterColumn, CustomFilter, CustomFilters, DateGroupItem, Filters
+
+
+
+############# FUNÇÕES #####################
+### formatação da tabela
+def centralizando(w):
+    alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+    for row in w.iter_rows():
+        for cell in row:
+            cell.alignment = alignment
+
+def tamanhoColunaComum(a):
+    for col in a.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        a.column_dimensions[column].width = adjusted_width
+
+
+##########################         criando esperas para o código        ############################
+
+def wait60(navegador,urlAtual):
+    try:
+        wait60 = WebDriverWait(navegador, 60) 
+        wait60.until(EC.url_changes(urlAtual))
+        time.sleep(3)
+    except:
+        navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
+
+
+def randomWait(navegador,urlAtual):
+    try:
+        aleatorio = random.randint(5, 55)
+        time.sleep(aleatorio)
+        randomwait = WebDriverWait(navegador, 5) 
+        randomwait.until(EC.url_changes(urlAtual))
+        print(aleatorio)
+    except:
+        navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
+
+#########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
+def informaçoesEmpresas():
+    informaçoesEmpresas = []
+    for j in range (1, qntEmpresas+1):
+        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]/div/div[1]').text
+        nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div[' + str(j) + ']/div[2]/div/span').text        
+        if len(cnpjEmpresaCompleto.split('\n')) == 1:
+            cnpjEmpresa = cnpjEmpresaCompleto
+            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
+        else:
+            cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
+            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
+        informaçoesEmpresas.append(informacoesEmpresa)  
+    return informaçoesEmpresas
+
+##########################        função para abrir os itens e retirar as informações necessárias        ############################
+def informaçoesItens():
+    #descrição do item:
+    descriçãoResumidaItem = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[1]/div/app-identificacao-e-fase-item/div[1]').text.split('\n')
+    #valor estimado:
+    valorEstimado = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[2]').text.split('\n')
+    #3 primeiras empresas:
+    descriçoesEmpresasCompleta = []
+    valoresOfertadosCompleta = []
+    try:
+        for f in range(1, 4):
+            nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
+            valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
+            descriçoesEmpresasCompleta.append(nomeEmpresa)
+            valoresOfertadosCompleta.append(valorOfertado)
+    except:
+        pass
+    #retirar os valores da lista completa e coloca-los na descrição da empresa completa
+    return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
 
 
 options = Options()
@@ -62,13 +144,13 @@ while True:
 
 pregao = "Pregão Eletrônico " + uasg + " - " + numero
 
-
 navegador = webdriver.Chrome()
 time.sleep(10)
 navegador.get('https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-area-trabalho-web/seguro/governo/area-trabalho')
 urlAtual = navegador.current_url
 time.sleep(10)
-##########################         criando espera para o login do usuario de 5min       ############################
+
+##########################         espera para o login do usuario de 5min       ############################
 try:
     waitLogin = WebDriverWait(navegador, 900).until(
         EC.presence_of_element_located((By.XPATH, '//*[@id="buscaCompra"]'))
@@ -76,27 +158,35 @@ try:
 except:
     navegador.execute_script("var e = alert('Sistema encerrando pois usuario não efetuou login, tente novamente e efetue o login.', '');document.body.setAttribute('loginscrapynãofeito', f)")
     time.sleep(10)
-    
-##########################         criando esperas para o código        ############################
 
-def wait60(navegador,urlAtual):
-    try:
-        wait60 = WebDriverWait(navegador, 60) 
-        wait60.until(EC.url_changes(urlAtual))
-        time.sleep(3)
-    except:
-        navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
+##########################        CRIANDO A TABELA DE APOIO        ############################
 
+wb = openpyxl.Workbook()
+####       CRIANDO A ABA COM TODAS EMPRESAS 
 
-def randomWait(navegador,urlAtual):
-    try:
-        aleatorio = random.randint(5, 55)
-        time.sleep(aleatorio)
-        randomwait = WebDriverWait(navegador, 5) 
-        randomwait.until(EC.url_changes(urlAtual))
-        print(aleatorio)
-    except:
-        navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
+wb.create_sheet('Empresas',0)
+wbEmpresas = wb['Empresas']
+#cabeçalho
+wbEmpresas.append(['CNPJ', 'ME/EPP', 'NOME EMPRESA'])
+
+####       CRIANDO A ABA DOS ITENS COM AS INFORMAÇÕES DAS 3 PRIMEIRAS EMPRESAS      
+
+wb.create_sheet('Três primeiras empresas',1)
+wbItens = wb['Três primeiras empresas']
+#cabeçalho
+wbItens.append(['Item/Descrição Resumida', 'Valor Estimado','Qnt Solicitada', 'Empresa', 'Valor ofertado pela empresa'])
+
+####      CRIANDO A ABA DE ANÁLISE DA EMPRESA 
+
+wb.create_sheet('Análise da empresa',2)
+wbAnalise = wb['Análise da empresa']
+#cabeçalho
+wbAnalise.append(['Descrição Resumida',	'Empresa', 'Qnt Solicitada', 'Valor Estimado', 'Valor ofertado pela empresa', 'Negociou Valor?', 'Especificação Técnica', 'Validade da Proposta', 'SICAF', 'Sanção / Ocorrência', 'CEIS', 'CNJ', 'TCU', 'Empresário Individual:Inscrição no Registro Público', 'MEI:Certificado da Condição de Microempreendedor Individual Verificar autenticidade', 'Sociedade Empresária ou Empresa Individual de Responsabilidade Limitada: Ato Constitutivo, Estatuto ou Contrato Social', 'Ato Constitutivo', 'Inscrição CNPJ', 'Regularidade Fiscal Fazenda Nacional', 'FGTS', 'CNDT', 'Inscrição Contribuintes Estadual -Excluído para ME/EPP', 'Regularidade Fazenda Estadual - Excluído para ME/EPP', 'Certidão Negativa de Falência', 'Balanço Patrimonial - Excluído para ME/EPP', 'Boa Situação Financeira', 'Habilitação Técnica'])
+
+numero1 = numero.replace('/', '_')
+arquivoExcel = 'Planilha Apoio Pregao '+ str(numero1)+'.xlsx'
+wb.save(arquivoExcel)
+
 
 ##########################         abrindo o pregao 14.133        ############################
 wait60(navegador,urlAtual)
@@ -128,6 +218,34 @@ handles = navegador.window_handles
 navegador.switch_to.window(handles[1])
 
 
+
+
+######## ABRINDO ABA EMPRESAS ######################
+time.sleep(5)
+urlAtual = navegador.current_url
+navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[1]/div/ul/li[2]/a').click()
+
+#####       retirando as informações das empresas  
+
+time.sleep(5)
+todasEmpresas = informaçoesEmpresas()
+wb = load_workbook(arquivoExcel)
+wbEmpresas = wb['Empresas']
+#colocando itens na planilha aba 1
+linha = 2  
+for a in todasEmpresas:
+    cnpj = a['CNPJ']
+    meEpp = a['ME/EPP']
+    nome = a['Nome']
+    wbEmpresas.cell(row=linha, column=1, value=cnpj)
+    wbEmpresas.cell(row=linha, column=2, value=meEpp)
+    wbEmpresas.cell(row=linha, column=3, value=nome)
+    linha += 1
+centralizando(wbEmpresas)
+wbEmpresas.auto_filter.ref = wbEmpresas.dimensions
+tamanhoColunaComum(wbEmpresas)
+wb.save(arquivoExcel)
+
 ##########################         iterando sobre os itens do pregão        ############################
 #abrindo item 1
 time.sleep(5)
@@ -135,41 +253,6 @@ urlAtual = navegador.current_url
 navegador.find_element(By.XPATH, '//*[@id="pn_id_2_content"]/app-selecao-fornecedores-governo-itens/div[2]/p-dataview/div/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
 wait60(navegador,urlAtual)
 
-
-##########################        função para abrir os itens e retirar as informações necessárias        ############################
-def informaçoesItens():
-    #descrição do item:
-    descriçãoResumidaItem = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[1]/div/app-identificacao-e-fase-item/div[1]').text.split('\n')
-    #valor estimado:
-    valorEstimado = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[2]').text.split('\n')
-    #3 primeiras empresas:
-    descriçoesEmpresasCompleta = []
-    valoresOfertadosCompleta = []
-    try:
-        for f in range(1, 4):
-            nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
-            valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
-            descriçoesEmpresasCompleta.append(nomeEmpresa)
-            valoresOfertadosCompleta.append(valorOfertado)
-    except:
-        pass
-    #retirar os valores da lista completa e coloca-los na descrição da empresa completa
-    return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
-
-#########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
-def informaçoesEmpresas():
-    informaçoesEmpresas = []
-    for j in range (1, qntEmpresas+1):
-        cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]/div/div[1]').text
-        nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div[' + str(j) + ']/div[2]/div/span').text        
-        if len(cnpjEmpresaCompleto.split('\n')) == 1:
-            cnpjEmpresa = cnpjEmpresaCompleto
-            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Não'}
-        else:
-            cnpjEmpresa = cnpjEmpresaCompleto.split('\n')[0]
-            informacoesEmpresa = {'CNPJ': cnpjEmpresa, 'Nome': nomeEmpresa, 'ME/EPP': 'Sim'}
-        informaçoesEmpresas.append(informacoesEmpresa)  
-    return informaçoesEmpresas
 
 ##########################        iterando sobre todos os itens        ############################
 informacoesCompletas = []
@@ -195,62 +278,10 @@ while True:
         xpathProximaPagina.click()
         randomWait(navegador,urlAtual)
 
-##########################        retirando as informações das empresas        ############################
-time.sleep(5)
-todasEmpresas = informaçoesEmpresas()
-
 ##########################        FIM DO SCRAPY        ############################
-##########################        CRIANDO A TABELA DE APOIO        ############################
 
-wb = openpyxl.Workbook()
-
-##########################        CRIANDO A TABELA DE EMPRESAS        ############################
-### formatação da tabela
-def centralizando(w):
-    alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
-    for row in w.iter_rows():
-        for cell in row:
-            cell.alignment = alignment
-
-def tamanhoColunaComum(a):
-    for col in a.columns:
-        max_length = 0
-        column = col[0].column_letter
-        for cell in col:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(cell.value)
-            except:
-                pass
-        adjusted_width = (max_length + 2)
-        a.column_dimensions[column].width = adjusted_width
-
-
-wb.create_sheet('Empresas',0)
-wbEmpresas = wb['Empresas']
-#cabeçalho
-wbEmpresas.append(['CNPJ', 'ME/EPP', 'NOME EMPRESA'])
-#colocando itens na planilha
-linha = 2  
-for a in todasEmpresas:
-    cnpj = a['CNPJ']
-    meEpp = a['ME/EPP']
-    nome = a['Nome']
-    wbEmpresas.cell(row=linha, column=1, value=cnpj)
-    wbEmpresas.cell(row=linha, column=2, value=meEpp)
-    wbEmpresas.cell(row=linha, column=3, value=nome)
-    linha += 1
-centralizando(wbEmpresas)
-wbEmpresas.auto_filter.ref = wbEmpresas.dimensions
-tamanhoColunaComum(wbEmpresas)
-
-
-##########################        CRIANDO A TABELA DOS ITENS COM AS INFORMAÇÕES DAS 3 PRIMEIRAS EMPRESAS      ############################
-
-wb.create_sheet('Três primeiras empresas',1)
-wbItens = wb['Três primeiras empresas']
-#cabeçalho
-wbItens.append(['Item/Descrição Resumida', 'Valor Estimado','Qnt Solicitada', 'Empresa', 'Valor ofertado pela empresa'])
+##########################       COLOCANDO ITENS NA PLANILHA       ############################
+#colocando itens na planilha aba 2
 linha1 = 2 
 for k in range(len(informacoesCompletas)):
     DescriçãoResumida1 = str(informacoesCompletas[k]['DescricaoResumida'][0])
@@ -280,13 +311,7 @@ centralizando(wbItens)
 wbItens.auto_filter.ref = wbItens.dimensions
 tamanhoColunaComum(wbItens)
 
-
-##########################        CRIANDO A TABELA DE ANÁLISE DA EMPRESA     ############################
-
-wb.create_sheet('Análise da empresa',2)
-wbAnalise = wb['Análise da empresa']
-#cabeçalho
-wbAnalise.append(['Descrição Resumida',	'Empresa', 'Qnt Solicitada', 'Valor Estimado', 'Valor ofertado pela empresa', 'Negociou Valor?', 'Especificação Técnica', 'Validade da Proposta', 'SICAF', 'Sanção / Ocorrência', 'CEIS', 'CNJ', 'TCU', 'Empresário Individual:Inscrição no Registro Público', 'MEI:Certificado da Condição de Microempreendedor Individual Verificar autenticidade', 'Sociedade Empresária ou Empresa Individual de Responsabilidade Limitada: Ato Constitutivo, Estatuto ou Contrato Social', 'Ato Constitutivo', 'Inscrição CNPJ', 'Regularidade Fiscal Fazenda Nacional', 'FGTS', 'CNDT', 'Inscrição Contribuintes Estadual -Excluído para ME/EPP', 'Regularidade Fazenda Estadual - Excluído para ME/EPP', 'Certidão Negativa de Falência', 'Balanço Patrimonial - Excluído para ME/EPP', 'Boa Situação Financeira', 'Habilitação Técnica'])
+#colocando itens na planilha aba 3
 linha2 = 2  
 for l in range(len(informacoesCompletas)):
     DescriçãoResumida2 = str(informacoesCompletas[l]['DescricaoResumida'][0])
@@ -318,8 +343,6 @@ wbAnalise.auto_filter.ref = wbAnalise.dimensions
 tamanhoColunaComum(wbAnalise)
 wbAnalise.row_dimensions[1].height = 98
 colunasEspecificas = ['N', 'O', 'P', 'S', 'V', 'W', 'X', 'Y','Z']
-
-
 
 for col in colunasEspecificas:
     wbAnalise.column_dimensions[col].width = 18
