@@ -77,12 +77,12 @@ def wait60(navegador,urlAtual):
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
 
-def randomWait(navegador,urlAtual):
+def randomWait(navegador):
     try:
         aleatorio = random.randint(5, 55)
         print(f'inicio da espera aleatoria de {aleatorio} segundos')
         time.sleep(aleatorio)
-        randomwait = WebDriverWait(navegador, 5) 
+
     except:
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
@@ -167,7 +167,6 @@ def limparNomeAba(nome):
 for i in range (1 , qntEmpresas + 1):
     urlAtual = navegador.current_url
     cnpjEmpresa, nomeEmpresa, meEPP = informaçoesEmpresas(i)
-    print(nomeEmpresa)
     wbEmpresas
     wbEmpresas.cell(row= i + 1, column=1, value=cnpjEmpresa)
     wbEmpresas.cell(row= i + 1, column=2, value=meEPP)
@@ -192,9 +191,8 @@ for i in range (1 , qntEmpresas + 1):
                 wbItens.append([numItem, nomeEmpresa, qntItem, valorEstimado, valorOfertado])
                 wb.save('Planilha Apoio Pregao ' + str(numero1) + '.xlsx')
             xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-propostas-itens-grupo/div/div[4]/app-selecao-fornecedores-governo-proposta-item/p-tabview/div/div[2]/p-tabpanel[1]/div/div/span/div/app-listagem-propostas-subitens-governo/div[2]/p-dataview/div/p-paginator/div/button[3]')
-            urlAtual = navegador.current_url
             xpathProximaPagina.click()
-            randomWait(navegador,urlAtual)
+            randomWait(navegador)
         except:
             ##########################       SAIR DOS ITENS PARA O GRUPO (BOTAO VOLTAR DENTRO DOS ITENS) OU PROXIMA PAGINA       ############################
             urlAtual = navegador.current_url
