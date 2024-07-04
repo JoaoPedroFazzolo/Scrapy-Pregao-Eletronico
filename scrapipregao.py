@@ -1,8 +1,6 @@
-import os
 import time
 import random
 import openpyxl
-import pandas as pd
 import PySimpleGUI as sg
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -14,7 +12,7 @@ from openpyxl.styles import Alignment, NamedStyle, PatternFill
 from openpyxl.worksheet.filters import FilterColumn, CustomFilter, CustomFilters, DateGroupItem, Filters
 
 
-
+navegador = webdriver.Chrome()
 ############# FUNÇÕES #####################
 ### formatação da tabela
 def centralizando(w):
@@ -48,18 +46,17 @@ def wait60(navegador,urlAtual):
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
 
-def randomWait(navegador,urlAtual):
+def randomWait(navegador):
     try:
-        aleatorio = random.randint(5, 55)
+        aleatorio = random.randint(5, 10)
+        print(f'inicio da espera aleatoria de {aleatorio} segundos')
         time.sleep(aleatorio)
-        randomwait = WebDriverWait(navegador, 5) 
-        randomwait.until(EC.url_changes(urlAtual))
-        print(aleatorio)
+
     except:
         navegador.execute_script("var e = alert('o tempo de carregamento da pagina passou do limite, reinicie o app.'), '');document.body.setAttribute('tempoEspirador', g)")
 
 #########################        função para abrir a aba empresas e retirar as informações de cada empresa resumida       ############################
-def informaçoesEmpresas():
+def informaçoesEmpresas(qntEmpresas):
     informaçoesEmpresas = []
     for j in range (1, qntEmpresas+1):
         cnpjEmpresaCompleto = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[2]/div/app-selecao-fornecedores-governo-participantes/div[2]/p-dataview/div/div/div['+ str(j) + ']/div[1]/div/div[1]').text
@@ -76,75 +73,81 @@ def informaçoesEmpresas():
 ##########################        função para abrir os itens e retirar as informações necessárias        ############################
 def informaçoesItens():
     #descrição do item:
-    descriçãoResumidaItem = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[1]/div/app-identificacao-e-fase-item/div[1]').text.split('\n')
+    descricaoResumidaItem = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[1]/div/app-identificacao-e-fase-item/div[1]').text
     #valor estimado:
-    valorEstimado = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[2]').text.split('\n')
-    #3 primeiras empresas:
-    descriçoesEmpresasCompleta = []
-    valoresOfertadosCompleta = []
-    try:
-        for f in range(1, 4):
-            nomeEmpresa = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text.split('\n'))
-            valorOfertado = (navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(f) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split('\n'))
-            descriçoesEmpresasCompleta.append(nomeEmpresa)
-            valoresOfertadosCompleta.append(valorOfertado)
-    except:
-        pass
-    #retirar os valores da lista completa e coloca-los na descrição da empresa completa
-    return descriçãoResumidaItem, valorEstimado, descriçoesEmpresasCompleta, valoresOfertadosCompleta
+    valorEstimado = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[2]/div/div/div/div[2]/div[2]').text.split(' ')[1]
+    #qnt solicitada:
+    qntSolicitada = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[2]/div/div/div/div[2]/div[1]').text
+    return descricaoResumidaItem, valorEstimado, qntSolicitada
 
+def proposta(i):
+    cnpjMEPP = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(i) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[1]').text.split('\n')
+    #nome empresa:
+    nomeEmpresa = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(i) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[1]/div/app-identificacao-e-situacao-participante-no-item/div/div[2]/span').text
+    #valor ofertado pela empresa:
+    valorOfertado = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-selecao-fornecedores-governo-propostas-item/div/div/div/p-dataview/div/div/div[' + str(i) + ']/app-dados-proposta-item-em-selecao-fornecedores/div/div[2]/div/div/div[2]/div[1]/span/span').text.split(' ')[1]
+    return cnpjMEPP, nomeEmpresa, valorOfertado
+
+
+def formatarValor(valor):
+    valor = valor.replace('.', '').replace(',', '.')
+    valor = valor.replace('.', ',')
+    return valor
 
 options = Options()
 options.page_load_strategy = 'normal'
 
 
 ##########################         Login no site         ############################
-layout = [
-    [sg.Text('Para a criação da planilha, preencha os campos abaixo conforme os exemplos;')],
-    [sg.Text('Após o ok irá abrir o browser e deverá ser efetuado o login no site do compras;')],
-    [sg.Text('Durante a execução do processo, não click em nada na janela aberta pelo programa, o restante pode ser usado normalmente;')],
-    [sg.Text('Trata-se de um programa de teste em aperfeiçoamento e elaboração pelo Ten Fazzolo, confira os valores da planilha com o sistema antes de qualquer atitude;')],
-    [sg.Text('Esta versão está funcionando apenas para pregões sem grupos, uma nova versao para grupos será desenvolvida futuramente;')],
-    [sg.Text('Acorreta execução do programa depende da velocidade do computador e internet, caso ocorra algum erro, tente em outro computador, caso persista, enviar um email para admfazzolo@gmail.com com a pane apresentada.')],
-    [sg.Text('UASG:'), sg.InputText(key='uasg')],
-    [sg.Text('Número do pregão (ex: XX/202X):'), sg.InputText(key='numero')],
-    [sg.Text('Quantidade de Empresas:'), sg.InputText(key='qntEmpresas')],
-    [sg.Button('Sair'), sg.Button('Enviar')]
-]
+# layout = [
+#     [sg.Text('Para a criação da planilha, preencha os campos abaixo conforme os exemplos;')],
+#     [sg.Text('Após o ok irá abrir o browser e deverá ser efetuado o login no site do compras;')],
+#     [sg.Text('Durante a execução do processo, não click em nada na janela aberta pelo programa, o restante pode ser usado normalmente;')],
+#     [sg.Text('Trata-se de um programa de teste em aperfeiçoamento e elaboração pelo Ten Fazzolo, confira os valores da planilha com o sistema antes de qualquer atitude;')],
+#     [sg.Text('Esta versão está funcionando apenas para pregões sem grupos, uma nova versao para grupos será desenvolvida futuramente;')],
+#     [sg.Text('Acorreta execução do programa depende da velocidade do computador e internet, caso ocorra algum erro, tente em outro computador, caso persista, enviar um email para admfazzolo@gmail.com com a pane apresentada.')],
+#     [sg.Text('UASG:'), sg.InputText(key='uasg')],
+#     [sg.Text('Número do pregão (ex: XX/202X):'), sg.InputText(key='numero')],
+#     [sg.Text('Quantidade de Empresas:'), sg.InputText(key='qntEmpresas')],
+#     [sg.Button('Sair'), sg.Button('Enviar')]
+# ]
 
-window = sg.Window('Dados do Pregão', layout)
-while True:
-    event, values = window.read()
+# window = sg.Window('Dados do Pregão', layout)
+# while True:
+#     event, values = window.read()
 
-    if event in (sg.WIN_CLOSED, 'Sair'):
-        break
-    elif event == 'Enviar':
-        uasg = values['uasg']
-        qntEmpresas = int(values['qntEmpresas'])
-        numero = values['numero']
+#     if event in (sg.WIN_CLOSED, 'Sair'):
+#         break
+#     elif event == 'Enviar':
+#         uasg = values['uasg']
+#         qntEmpresas = int(values['qntEmpresas'])
+#         numero = values['numero']
 
-        confirmationLayout = [
-            [sg.Text(f'UASG: {uasg}')],
-            [sg.Text(f'Número do pregão: {numero}')],
-            [sg.Text(f'Quantidade de Empresas: {qntEmpresas}')],
-            [sg.Button('Alterar'), sg.Button('Confirmar')],
-        ]
+#         confirmationLayout = [
+#             [sg.Text(f'UASG: {uasg}')],
+#             [sg.Text(f'Número do pregão: {numero}')],
+#             [sg.Text(f'Quantidade de Empresas: {qntEmpresas}')],
+#             [sg.Button('Alterar'), sg.Button('Confirmar')],
+#         ]
 
-        confirmationWindow = sg.Window('Confirmação', confirmationLayout)
+#         confirmationWindow = sg.Window('Confirmação', confirmationLayout)
 
-        while True:
-            event, _ = confirmationWindow.read()
-            if event == 'Alterar':
-                confirmationWindow.close()
-                break
-            elif event == 'Confirmar':
-                confirmationWindow.close()
-                window.close()
-                break
+#         while True:
+#             event, _ = confirmationWindow.read()
+#             if event == 'Alterar':
+#                 confirmationWindow.close()
+#                 break
+#             elif event == 'Confirmar':
+#                 confirmationWindow.close()
+#                 window.close()
+#                 break
 
+qntEmpresas = 19
+uasg = str(120071)
+numero = "90015/2024"
 pregao = "Pregão Eletrônico " + uasg + " - " + numero
 
-navegador = webdriver.Chrome()
+
 time.sleep(10)
 navegador.get('https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-area-trabalho-web/seguro/governo/area-trabalho')
 urlAtual = navegador.current_url
@@ -228,7 +231,7 @@ navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-
 #####       retirando as informações das empresas  
 
 time.sleep(5)
-todasEmpresas = informaçoesEmpresas()
+todasEmpresas = informaçoesEmpresas(qntEmpresas)
 wb = load_workbook(arquivoExcel)
 wbEmpresas = wb['Empresas']
 #colocando itens na planilha aba 1
@@ -247,97 +250,69 @@ tamanhoColunaComum(wbEmpresas)
 wb.save(arquivoExcel)
 
 ##########################         iterando sobre os itens do pregão        ############################
-#abrindo item 1
+#indo para itens
 time.sleep(5)
-urlAtual = navegador.current_url
-navegador.find_element(By.XPATH, '//*[@id="pn_id_2_content"]/app-selecao-fornecedores-governo-itens/div[2]/p-dataview/div/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
-wait60(navegador,urlAtual)
+navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[1]/div/ul/li[1]/a').click()
+time.sleep(5)
+
+
+#abrindo item 1
+time.sleep(10)
+navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[2]/p-tabpanel[1]/div/app-selecao-fornecedores-governo-itens/div[2]/p-dataview/div/div/div[1]/app-card-item/div/div[3]/div[2]/app-botao-icone/span/button').click()
+time.sleep(10)
 
 
 ##########################        iterando sobre todos os itens        ############################
-informacoesCompletas = []
-
 while True:
-    informacoes = informaçoesItens()
-    iteracao = {
-        "DescricaoResumida": informacoes[0],
-        "Quantidade": informacoes[1][2],
-        "ValorEstimado": informacoes[1][3],
-        "NomeEmpresas": informacoes[2],
-        "ValoresOfertados": informacoes[3]
-    }
-    informacoesCompletas.append(iteracao)
-    urlAtual = navegador.current_url
-    xpathProximaPagina = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[4]/span/button')
-    if xpathProximaPagina.get_attribute("disabled"):
-        navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/footer/app-acoes-governo-no-item/div/button').click()
-        wait60(navegador,urlAtual)
-        navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo/div/p-tabview/div/div[1]/div/ul/li[2]/a').click()
+    try:
+        descricaoResumidaItem, valorEstimado, qntSolicitada = informaçoesItens()
+        valorEstimado = formatarValor(valorEstimado)
+        cnpjMEPP, nomeEmpresa, valorOfertado = proposta(1)
+        valorOfertado = formatarValor(valorOfertado)
+        wb = load_workbook(arquivoExcel)
+        wbAnalise = wb['Análise da empresa']
+        wbAnalise.append([descricaoResumidaItem,nomeEmpresa, qntSolicitada, valorEstimado, valorOfertado])
+        wbItens = wb['Três primeiras empresas']
+        wbItens.append([descricaoResumidaItem, valorEstimado, qntSolicitada, cnpjMEPP[0], nomeEmpresa, valorOfertado])
+        wb.save(arquivoExcel) 
+        try:
+            for i in range (2, 4):
+                cnpjMEPP, nomeEmpresa, valorOfertado = proposta(i)
+                valorOfertado = formatarValor(valorOfertado)
+                wbItens.append(['', '', '', cnpjMEPP[0], nomeEmpresa, valorOfertado])
+                wb.save(arquivoExcel)    
+        except:
+            pass
+
+    except:
+        print('deserto')
+        wbAnalise = wb['Análise da empresa']
+        wbAnalise.append([descricaoResumidaItem, valorEstimado, qntSolicitada, 'DESERTO'])
+        wbItens = wb['Três primeiras empresas']
+        wbItens.append([descricaoResumidaItem, valorEstimado, qntSolicitada, 'DESERTO'])
+        wb.save(arquivoExcel)  
+        pass
+
+    proximoItem = navegador.find_element(By.XPATH, '/html/body/app-root/div/div/div/app-cabecalho-selecao-fornecedores-governo/div[2]/app-selecao-fornecedores-governo-item/div/div/app-cabecalho-item/div/div[3]/app-botao-icone[4]/span/button')
+    if proximoItem.get_attribute("disabled"):
+        print('Planilha concluida')
+        wb.save(arquivoExcel)  
         break
     else:
-        xpathProximaPagina.click()
-        randomWait(navegador,urlAtual)
+        proximoItem.click()
+        randomWait(navegador)
+
 
 ##########################        FIM DO SCRAPY        ############################
 
-##########################       COLOCANDO ITENS NA PLANILHA       ############################
-#colocando itens na planilha aba 2
-linha1 = 2 
-for k in range(len(informacoesCompletas)):
-    DescriçãoResumida1 = str(informacoesCompletas[k]['DescricaoResumida'][0])
-    ValorEstimado1 = round(float(informacoesCompletas[k]['ValorEstimado'].replace("R$", "").replace(".", "").replace(",", ".")), 4)
-    QntSolicitada1 = int(informacoesCompletas[k]['Quantidade'])
-    wbItens.cell(row=linha1, column=1, value=DescriçãoResumida1)
-    wbItens.cell(row=linha1, column=2, value=ValorEstimado1)
-    wbItens.cell(row=linha1, column=3, value=QntSolicitada1)   
-    try:
-        for n in range(3):
-            Empresa1 = str(informacoesCompletas[k]['NomeEmpresas'][n][0])
-            ValorOfertado1 = round(float(informacoesCompletas[k]['ValoresOfertados'][n][0].replace("R$", "").replace(".", "").replace(",", ".")), 4)
-            wbItens.cell(row=linha1, column=4, value=Empresa1)
-            wbItens.cell(row=linha1, column=5, value=ValorOfertado1)
-            linha1 += 1
-    except:
-        pass
-
-cellStyle = NamedStyle(name="cellStyle")
-cellStyle.number_format = '"R$ "#,##0.00_);[Red]"R$ "#,##0.00'
-for cell in wbItens['B']:
-    cell.style = cellStyle
-for cell in wbItens['E']:
-    cell.style = cellStyle
+##########################       Acertando estetica da planilha       ############################
+#aba 2
 
 centralizando(wbItens)
 wbItens.auto_filter.ref = wbItens.dimensions
 tamanhoColunaComum(wbItens)
 
-#colocando itens na planilha aba 3
-linha2 = 2  
-for l in range(len(informacoesCompletas)):
-    DescriçãoResumida2 = str(informacoesCompletas[l]['DescricaoResumida'][0])
-    try:      
-        Empresa2 = str(informacoesCompletas[l]['NomeEmpresas'][0][0])
-    except:
-        Empresa2 = "Deserto"
-    QntSolicitada2 = int(informacoesCompletas[l]['Quantidade'])
-    ValorEstimado2 = round(float((informacoesCompletas[l]['ValorEstimado']).replace("R$", "").replace(".", "").replace(",", ".")), 4)
-    try:
-        ValorOfertado2 = round(float((informacoesCompletas[l]['ValoresOfertados'][0][0]).replace("R$", "").replace(".", "").replace(",", ".")), 4)
-    except:
-        ValorOfertado2 = 0
-
-    wbAnalise.cell(row=linha2, column=1, value=DescriçãoResumida2)
-    wbAnalise.cell(row=linha2, column=2, value=Empresa2)
-    wbAnalise.cell(row=linha2, column=3, value=QntSolicitada2)
-    wbAnalise.cell(row=linha2, column=4, value=ValorEstimado2)
-    wbAnalise.cell(row=linha2, column=5, value=ValorOfertado2)
-    linha2 += 1
-
-for cell in wbAnalise['D']:
-    cell.style = cellStyle
-for cell in wbAnalise['E']:
-    cell.style = cellStyle
-
+#caba 3
 centralizando(wbAnalise)
 wbAnalise.auto_filter.ref = wbAnalise.dimensions
 tamanhoColunaComum(wbAnalise)
@@ -360,8 +335,7 @@ for row in wbAnalise.iter_rows(min_row=2, min_col=4, max_col=5):
 
 ##########################        salvando planilha     ############################
 
-numero1 = numero.replace('/', '_')
-wb.save('Planilha Apoio Pregao '+ str(numero1)+'.xlsx')
+wb.save(arquivoExcel)
 #navegador.execute_script("var f = alert('Tabela criada com sucesso', '');document.body.setAttribute('tabelaCriada', h)")
-time.sleep(5)
-sg.popup('Planilha criada com sucesso')
+#time.sleep(5)
+#sg.popup('Planilha criada com sucesso')
