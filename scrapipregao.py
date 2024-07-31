@@ -14,8 +14,8 @@ from openpyxl.worksheet.filters import FilterColumn, CustomFilter, CustomFilters
 
 
 uasg = 120071
-qntEmpresas = 6
-numero = "90013/2024"
+qntEmpresas = 3
+numero = "90014/2024"
 pregao = "Pregão Eletrônico " + str(uasg) + " - " + str(numero)
 
 wb = openpyxl.Workbook()
@@ -79,7 +79,7 @@ def wait60(navegador,urlAtual):
 
 def randomWait(navegador):
     try:
-        aleatorio = random.randint(5, 55)
+        aleatorio = random.randint(5, 20)
         print(f'inicio da espera aleatoria de {aleatorio} segundos')
         time.sleep(aleatorio)
 
