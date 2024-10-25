@@ -11,6 +11,8 @@ Criação de um scrapy para consulta dos dados mais importantes para o pregoeiro
 
 Após efetuar obter essas informações para todos os itens do certame, é criada uma planilha conforme exemplo: [Planilha Apoio Pregao 31_2023.xlsx] para o pregoeiro utilizar para controle das ações que foram executadas em para cada item ou empresa. Para auxiliar o pregoeiro, os itens acima do estimado, são destacados em vermelho na aba "Análise das Empresas"  
 
+Tal ferramenta foi desenvovida devido a necessidade de todo pregoeiro criar uma planilha de controle, contendo os itens acima elencados, de ações tomadas em todo pregão eletrônico que participa, porém essa planilha acaba sendo feita manualmente por falta de ferramenta de extração de dados dentro do sistema de pregão eletrônico, que a dependender da quantidade de itens do processo, se torna algo extremamente lento e passivel de falhas. Esta ferramenta automatiza este processo, tirando o risco de erro humano na eaboração desta planiha, além de ser extremamente mais rápido.
+
 # Instruções para utilizar o script:
 -Tendo em vista que o sistema acessa o perfil do pregoeiro, é necessário que o usuário tenha cadastro no sistem compras.gov como Governo.  
 -Faça o download dos arquivos [Criador de planilha.exe] e [geckodriver.exe]  
